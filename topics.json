@@ -1,0 +1,140 @@
+{
+  "_doc": "Topic categories for GPT Archive. Each category has 'strong' signals (3 pts each) and 'weak' signals (1 pt each). A conversation needs to reach the threshold score to be classified into a category. Customize these to match your own interests and work.",
+  "threshold": 3,
+  "categories": {
+    "Programming & Software Development": {
+      "strong": [
+        "python script", "javascript", "typescript", "react component",
+        "api endpoint", "stack trace", "git merge", "pull request",
+        "database schema", "sql query", "dockerfile", "unit test",
+        "syntax error", "refactor", "regex pattern", "css grid",
+        "rest api", "graphql", "webpack", "npm install",
+        "class definition", "async await", "try catch"
+      ],
+      "weak": [
+        "code", "function", "variable", "deploy", "server", "bug",
+        "debug", "compile", "import", "library", "framework",
+        "repository", "commit", "branch", "array", "string",
+        "loop", "frontend", "backend", "html", "css"
+      ]
+    },
+    "Writing & Communication": {
+      "strong": [
+        "cover letter", "proofread", "rewrite this", "blog post draft",
+        "email draft", "press release", "linkedin post", "newsletter",
+        "tone of voice", "call to action", "subject line",
+        "executive summary", "talking points", "speech draft"
+      ],
+      "weak": [
+        "write", "edit", "draft", "grammar", "paragraph",
+        "essay", "article", "copywriting", "headline",
+        "summary", "outline", "reword", "rephrase"
+      ]
+    },
+    "Career & Job Search": {
+      "strong": [
+        "resume", "job description", "interview prep", "cover letter",
+        "linkedin profile", "salary negotiation", "behavioral question",
+        "star method", "hiring manager", "job application",
+        "career transition", "portfolio review"
+      ],
+      "weak": [
+        "job", "hire", "recruiter", "salary", "interview",
+        "career", "promotion", "networking", "reference",
+        "onboarding", "job search", "offer letter"
+      ]
+    },
+    "Learning & Education": {
+      "strong": [
+        "explain like", "eli5", "teach me", "study guide",
+        "flashcard", "lecture notes", "textbook", "curriculum",
+        "practice problem", "learning path", "tutorial",
+        "how does this work"
+      ],
+      "weak": [
+        "explain", "learn", "concept", "understand", "example",
+        "definition", "meaning of", "difference between",
+        "history of", "overview", "introduction"
+      ]
+    },
+    "Business & Strategy": {
+      "strong": [
+        "business model", "market sizing", "pitch deck", "go-to-market",
+        "competitive analysis", "swot analysis", "business plan",
+        "value proposition", "unit economics", "customer segment",
+        "pricing strategy", "one-pager", "investor update",
+        "okrs", "kpis"
+      ],
+      "weak": [
+        "startup", "founder", "revenue", "investor", "strategy",
+        "market", "growth", "acquisition", "partnership",
+        "competitor", "positioning", "roadmap", "stakeholder"
+      ]
+    },
+    "Data & Analysis": {
+      "strong": [
+        "sql query", "pivot table", "pandas", "dataframe",
+        "regression", "csv file", "data visualization", "matplotlib",
+        "excel formula", "jupyter notebook", "correlation",
+        "a/b test result"
+      ],
+      "weak": [
+        "data", "chart", "graph", "spreadsheet", "analytics",
+        "metric", "dashboard", "report", "trend", "average",
+        "percentage", "calculate"
+      ]
+    },
+    "Creative & Brainstorming": {
+      "strong": [
+        "brainstorm", "story about", "creative writing", "character name",
+        "plot twist", "short story", "poem about", "song lyrics",
+        "name ideas", "tagline", "slogan", "brand name",
+        "worldbuilding", "dialogue"
+      ],
+      "weak": [
+        "idea", "creative", "imagine", "fiction", "poem",
+        "story", "narrative", "inspiration", "concept",
+        "aesthetic", "vibe", "mood"
+      ]
+    },
+    "AI & Technology": {
+      "strong": [
+        "large language model", "llm", "gpt", "transformer",
+        "fine-tuning", "prompt engineering", "machine learning",
+        "neural network", "embeddings", "vector database",
+        "rag", "chatbot", "stable diffusion", "midjourney",
+        "token limit", "hallucination"
+      ],
+      "weak": [
+        "ai ", "automation", "model", "api", "chatgpt",
+        "artificial intelligence", "deep learning", "training data",
+        "inference", "benchmark", "openai", "anthropic"
+      ]
+    },
+    "Health & Wellness": {
+      "strong": [
+        "symptoms of", "side effects", "workout plan", "calorie count",
+        "diagnosis", "blood test", "supplement", "physical therapy",
+        "meal plan", "sleep schedule", "meditation",
+        "mental health", "therapy session"
+      ],
+      "weak": [
+        "health", "pain", "exercise", "diet", "sleep",
+        "anxiety", "stress", "nutrition", "weight",
+        "doctor", "medicine", "injury", "vitamin"
+      ]
+    },
+    "Practical & Everyday": {
+      "strong": [
+        "recipe for", "how to fix", "time zone", "flight from",
+        "packing list", "cleaning tips", "home repair",
+        "gift ideas", "travel itinerary", "budget template"
+      ],
+      "weak": [
+        "cook", "travel", "buy", "price", "recommend",
+        "apartment", "moving", "insurance", "tax",
+        "restaurant", "booking", "schedule"
+      ]
+    }
+  }
+}

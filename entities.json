@@ -1,0 +1,13 @@
+{
+  "_doc": "Entity definitions for GPT Archive. Keys are lowercase match patterns, values are canonical display names. Add your own companies and people to improve entity-based filtering.",
+  "companies": {
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+    "google": "Google",
+    "microsoft": "Microsoft",
+    "aws": "AWS",
+    "stripe": "Stripe",
+    "github": "GitHub"
+  },
+  "people": {}
+}
