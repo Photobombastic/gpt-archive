@@ -125,8 +125,6 @@ def classify_work_type(entry, text):
     combined = f"{title} {first_msg}"
     text_lower = text.lower()
 
-    user_text = extract_user_text(text)
-
     types = []
 
     consulting_strong = ["data room", "market sizing", "canvas", "investment memo",

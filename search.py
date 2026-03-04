@@ -113,7 +113,7 @@ def extract_snippets(text, pattern, max_snippets=3, context_chars=100):
 
 def filter_user_messages(text):
     """Extract only USER message blocks from a conversation file."""
-    blocks = re.split(r'^## (USER|ASSISTANT)\s*$', text, flags=re.MULTILINE)
+    blocks = re.split(r'^## (USER|ASSISTANT|TOOL|SYSTEM)(?:\s*\([^)]*\))?\s*$', text, flags=re.MULTILINE)
     user_parts = []
     i = 1
     while i < len(blocks) - 1:
@@ -129,7 +129,7 @@ def format_date(date_str):
     """Format YYYY-MM-DD into a readable date."""
     try:
         dt = datetime.strptime(date_str, "%Y-%m-%d")
-        return dt.strftime("%b %-d, %Y")
+        return f"{dt.strftime('%b')} {dt.day}, {dt.strftime('%Y')}"
     except (ValueError, TypeError):
         return date_str or "unknown"
 
@@ -249,10 +249,12 @@ def main():
     filtered = catalog
 
     if args.after:
-        filtered = [e for e in filtered if e.get("date", "") > args.after]
+        filtered = [e for e in filtered
+                    if e.get("date", "") >= args.after and e.get("date", "") != "unknown"]
 
     if args.before:
-        filtered = [e for e in filtered if e.get("date", "") < args.before]
+        filtered = [e for e in filtered
+                    if e.get("date", "") <= args.before and e.get("date", "") != "unknown"]
 
     if args.model:
         model_lower = args.model.lower()
@@ -333,10 +335,7 @@ def main():
 
     # ── Phase 3: Sort and display ──────────────────────────────────────────
 
-    # Primary: most matches first. Secondary: newest date first.
-    results.sort(key=lambda r: (-r[1], r[0].get("date", "")), reverse=False)
-    # For the date tiebreaker we want descending (newest first).
-    # Since dates are YYYY-MM-DD strings, reversing them lexicographically:
+    # Most matches first, then newest date first as tiebreaker.
     results.sort(key=lambda r: (-r[1], tuple(-ord(c) for c in r[0].get("date", ""))))
 
     total_matches = sum(r[1] for r in results)

@@ -31,8 +31,12 @@ def load_config(filename, default=None):
 
 
 def normalize_title(title):
-    """Strip special chars to match filesystem-sanitized filenames."""
-    return re.sub(r"['\"\?\!/\\\.\u00b7:;]", "", title)
+    """Strip special chars to match filesystem-sanitized filenames.
+
+    Must mirror the sanitization logic in build_catalog.py:
+    keep only alphanumeric, space, hyphen, underscore.
+    """
+    return "".join(c if c.isalnum() or c in " -_" else "" for c in title).strip()
 
 
 def build_file_index(conversations_dir=None):

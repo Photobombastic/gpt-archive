@@ -136,7 +136,7 @@ Define your own topic categories with strong and weak signal keywords:
 
 **How scoring works:** Each strong signal match adds 3 points, each weak signal adds 1 point. A conversation must reach the threshold score to be classified into a category. This prevents false positives from generic keywords.
 
-The default `topics.json` ships with 10 generic categories. Customize them to match your interests.
+The default `topics.json` ships with 16 categories covering programming, writing, career, learning, business, data, creative, AI/tech, health, practical, finance, legal, math/science, relationships, language, and entertainment. Customize them to match your interests.
 
 ## Directory Structure After Running
 

@@ -252,7 +252,10 @@ def process_export(export_dir):
                 
                 # Write individual conversation markdown
                 date_prefix = timestamp_to_date(create_time).replace("-", "")
+                if date_prefix == "unknown":
+                    date_prefix = "00000000"
                 safe_title = "".join(c if c.isalnum() or c in " -_" else "" for c in title)[:80].strip()
+                safe_title = safe_title or "untitled"
                 filename = f"{date_prefix}_{safe_title}.md"
                 
                 md_content = conversation_to_markdown(meta, messages)

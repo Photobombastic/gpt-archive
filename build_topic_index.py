@@ -3,7 +3,8 @@
 GPT Archive — Topic Indexer
 
 Reads catalog.json and classifies conversations into topic categories
-using a configurable weighted-scoring system.
+using a configurable weighted-scoring system. Reads conversation files
+for deeper signal when title + first message aren't enough.
 
 Customize topics.json to define your own categories with strong/weak
 signal keywords.
@@ -12,13 +13,64 @@ Usage: python3 build_topic_index.py
 """
 
 import json
+import re
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 
-from archive_utils import load_config
+from archive_utils import load_config, find_conversation_file
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def _extract_user_text(full_text):
+    """Extract only USER message blocks from a conversation markdown file."""
+    blocks = re.split(
+        r'^## (USER|ASSISTANT|TOOL|SYSTEM)(?:\s*\([^)]*\))?\s*$',
+        full_text, flags=re.MULTILINE,
+    )
+    parts = []
+    i = 1
+    while i < len(blocks) - 1:
+        if blocks[i].strip() == "USER":
+            parts.append(blocks[i + 1])
+        i += 2
+    return "\n".join(parts)
+
+
+# Intent patterns: structural patterns in the first user message that
+# indicate what KIND of task the conversation is, regardless of topic.
+# Each pattern maps to a category. Checked as a final fallback when
+# keyword matching fails.
+INTENT_PATTERNS = [
+    # Questions / explanations → Learning
+    (r"^(what is|what are|what was|what does|what do|who is|who are|who was)\b", "Learning & Education"),
+    (r"^(how does|how do|how is|how are|how did|how can|how would)\b", "Learning & Education"),
+    (r"^(why does|why do|why is|why are|why did|why would)\b", "Learning & Education"),
+    (r"^(explain|tell me about|describe|define|what('s| is) the difference)\b", "Learning & Education"),
+    (r"^(is it true|is there|are there|does it|do they|can you explain)\b", "Learning & Education"),
+
+    # Image/content generation → Creative
+    (r"(generate|create|make|draw|design|imagine)\s+(a |an |me |some )?(image|photo|picture|illustration|logo|caricature|portrait)", "Creative & Brainstorming"),
+    (r"(generate|create|make)\s+(a |an |me |some )?(photorealistic|abstract|cartoon|realistic)", "Creative & Brainstorming"),
+
+    # Fixing / troubleshooting → Practical
+    (r"(help me (fix|repair|troubleshoot|reset|set up|install|configure))\b", "Practical & Everyday"),
+    (r"^(fix|repair|troubleshoot)\b", "Practical & Everyday"),
+    (r"(not working|doesn't work|won't work|broken|stuck)\b", "Practical & Everyday"),
+
+    # Translation / language → Language
+    (r"(translate|traduci|traduce|how do you say|como se dice|cómo se dice)\b", "Language & Translation"),
+    (r'(meaning of|what does .{1,30} mean|qué significa|qué quiere decir)\b', "Language & Translation"),
+
+    # Advice / decisions → Relationships (when about people)
+    (r"(should i|what should i|what would you|help me decide|advice on)\b", "Learning & Education"),
+
+    # Math / calculation → Math
+    (r"^(solve|calculate|compute|isolate|simplify|convert)\b", "Math & Science"),
+    (r"^(how much|how many) (does|do|is|are|would|will)\b", "Math & Science"),
+]
 
 
 def load_topic_categories():
@@ -29,12 +81,16 @@ def load_topic_categories():
     return categories, threshold
 
 
-def classify_conversation(entry, categories_spec, threshold=3):
+def classify_conversation(entry, categories_spec, threshold=3, full_text=None):
     """Classify a conversation into topic categories using weighted scoring.
 
     Each category defines strong signals (3 points) and weak signals (1 point).
     A conversation must reach the threshold score to be classified into a
     category.
+
+    First checks title + first message. If nothing matches and full_text
+    is available, scans the full conversation for signals (with reduced
+    weight to avoid false positives from passing mentions).
     """
     title = (entry.get("title") or "").lower()
     first_msg = (entry.get("first_user_message") or "").lower()
@@ -51,6 +107,31 @@ def classify_conversation(entry, categories_spec, threshold=3):
                 score += 1
         if score >= threshold:
             categories.append(cat_name)
+
+    # If nothing matched from title + first message, try user messages
+    # in the full text. Only user messages are scanned to avoid false
+    # positives from assistant responses (which contain AI/code terms
+    # in virtually every conversation).
+    if not categories and full_text:
+        user_text = _extract_user_text(full_text)
+        text_lower = user_text[:8000].lower()
+        for cat_name, signals in categories_spec.items():
+            score = 0
+            strong_hits = sum(1 for term in signals.get("strong", []) if term in text_lower)
+            weak_hits = sum(1 for term in signals.get("weak", []) if term in text_lower)
+            score = strong_hits * 3 + weak_hits
+            if score >= threshold:
+                categories.append(cat_name)
+
+    # Third pass: intent detection from first user message structure.
+    # Catches "what is X", "generate an image of X", "fix my X" etc.
+    # regardless of what X is.
+    if not categories and first_msg:
+        for pattern, cat in INTENT_PATTERNS:
+            if re.search(pattern, first_msg, re.IGNORECASE):
+                if cat not in categories:
+                    categories.append(cat)
+                break  # one intent match is enough
 
     if not categories:
         categories.append("Uncategorized")
@@ -77,10 +158,27 @@ def build_topic_index(export_dir):
 
     topic_map = defaultdict(list)
 
-    for entry in catalog:
+    for i, entry in enumerate(catalog):
+        # Try title + first message first (fast path)
         categories = classify_conversation(entry, categories_spec, threshold)
+
+        # If uncategorized, try reading the full conversation file
+        if categories == ["Uncategorized"]:
+            filepath = find_conversation_file(entry)
+            if filepath and filepath.exists():
+                try:
+                    full_text = filepath.read_text(encoding="utf-8")
+                    categories = classify_conversation(
+                        entry, categories_spec, threshold, full_text=full_text
+                    )
+                except (OSError, UnicodeDecodeError):
+                    pass
+
         for cat in categories:
             topic_map[cat].append(entry)
+
+        if (i + 1) % 200 == 0:
+            print(f"  Processed {i + 1}/{len(catalog)}...")
 
     sorted_topics = sorted(topic_map.items(), key=lambda x: len(x[1]), reverse=True)
 
@@ -147,8 +245,9 @@ def build_topic_index(export_dir):
     for topic, entries in sorted_topics:
         print(f"  {topic}: {len(entries)}")
 
-    uncat = sum(1 for e in catalog if classify_conversation(e, categories_spec, threshold) == ["Uncategorized"])
-    print(f"\n  Uncategorized: {uncat} ({uncat/len(catalog)*100:.1f}%)")
+    uncat = len(topic_map.get("Uncategorized", []))
+    if catalog:
+        print(f"\n  Uncategorized: {uncat} ({uncat / len(catalog) * 100:.1f}%)")
 
 
 if __name__ == "__main__":
