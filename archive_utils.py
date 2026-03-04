@@ -5,29 +5,11 @@ GPT Archive — Shared Utilities
 Common functions used across the archive pipeline scripts.
 """
 
-import json
-import re
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 CATALOG_PATH = SCRIPT_DIR / "catalog.json"
 CONVERSATIONS_DIR = SCRIPT_DIR / "conversations"
-
-
-def load_config(filename, default=None):
-    """Load a JSON config file from the script directory.
-
-    Returns the parsed dict, or *default* (empty dict if not specified)
-    when the file is missing.
-    """
-    config_path = SCRIPT_DIR / filename
-    if not config_path.exists():
-        if default is not None:
-            return default
-        print(f"Note: {filename} not found — using empty defaults.")
-        return {}
-    with open(config_path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def normalize_title(title):

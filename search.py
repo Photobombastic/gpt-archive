@@ -181,7 +181,7 @@ def main():
   python3 search.py "resume" -t
   python3 search.py "TODO|FIXME" -r --user-only
   python3 search.py "startup" --full -n 5
-  python3 search.py "api" --company stripe --export stripe_api.md""",
+  python3 search.py "api" --export api_results.md""",
     )
     parser.add_argument("query", help="Search query (text or regex with -r)")
     parser.add_argument("-t", "--title-only", action="store_true",
@@ -202,11 +202,6 @@ def main():
                         help="Treat query as a regular expression")
     parser.add_argument("--export", metavar="FILE",
                         help="Export full matching conversations to a single file")
-    parser.add_argument("--company", metavar="NAME",
-                        help="Filter to conversations mentioning this company (from entities)")
-    parser.add_argument("--work-type", metavar="TYPE",
-                        help="Filter by work type (consulting-engagement, resume-prep, etc.)")
-
     args = parser.parse_args()
 
     # Compile the search pattern
@@ -232,9 +227,6 @@ def main():
     if args.model:        flags_parts.append(f"model={args.model}")
     if args.full:         flags_parts.append("full output")
     if args.export:       flags_parts.append(f"export → {args.export}")
-    if args.company:      flags_parts.append(f"company={args.company}")
-    if args.work_type:    flags_parts.append(f"work_type={args.work_type}")
-
     flags_str = f"  {META_STYLE}[{', '.join(flags_parts)}]{RESET}" if flags_parts else ""
     print(f"  Searching for: {MATCH_STYLE}{args.query}{RESET}{flags_str}")
     print()
@@ -259,18 +251,6 @@ def main():
     if args.model:
         model_lower = args.model.lower()
         filtered = [e for e in filtered if model_lower in e.get("model", "").lower()]
-
-    if args.company:
-        company_lower = args.company.lower()
-        filtered = [e for e in filtered
-                    if any(company_lower in c.lower()
-                           for c in e.get("entities", {}).get("companies", []))]
-
-    if args.work_type:
-        wt_lower = args.work_type.lower()
-        filtered = [e for e in filtered
-                    if any(wt_lower in wt.lower()
-                           for wt in e.get("entities", {}).get("work_type", []))]
 
     filtered_count = len(filtered)
 

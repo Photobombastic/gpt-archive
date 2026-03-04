@@ -11,13 +11,7 @@
     "assistant_messages": 6,
     "first_user_message": "I have a Python script that's throwing a KeyError when I try to access a nested dictionary. Here's the code...",
     "is_archived": false,
-    "gizmo_id": null,
-    "entities": {
-      "companies": ["Google"],
-      "people": [],
-      "domains": [],
-      "work_type": ["general"]
-    }
+    "gizmo_id": null
   },
   {
     "id": "def67890-1234-5555-eeee-ffffgggghhhh",
@@ -31,12 +25,6 @@
     "assistant_messages": 16,
     "first_user_message": "Can you help me tailor my resume for this product manager position? Here's the job description...",
     "is_archived": false,
-    "gizmo_id": null,
-    "entities": {
-      "companies": ["Stripe"],
-      "people": [],
-      "domains": [],
-      "work_type": ["resume-prep"]
-    }
+    "gizmo_id": null
   }
 ]
